@@ -74,7 +74,8 @@ tr {
     border-radius: 100%;
     display: inline-block;
     margin-right: 2px;
-    border: 1.5px solid #777;
+    border: 3px solid #000;
+    background: rgba(256,256,256,1);
 }
 
 .xs {

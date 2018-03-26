@@ -96,7 +96,7 @@ function pointToLayer(feature, latlng) {
             radius: getRadius(feature.properties.RailFare__PeakTime),
             color: "#000",
             fillColor: setFill(feature.properties.RailFare__PeakTime),
-            weight: 3,
+            strokeWidth: 2.1,
             opacity: 1,
             fillOpacity: 1
         }
@@ -185,7 +185,10 @@ map.on('popupclose', function(e) {
 
 // GEOCODER 
 
-var searchControl = L.esri.Geocoding.geosearch({position:'topleft'}).addTo(map);
+var searchControl = L.esri.Geocoding.geosearch({
+  position:'topleft',
+  searchBounds: L.latLngBounds([38.653271, -77.387060],[39.117203, -76.678442])
+}).addTo(map);
 
 var results = L.layerGroup().addTo(map);
 
