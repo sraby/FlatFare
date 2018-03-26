@@ -1,0 +1,60 @@
+<html>
+	<head>
+		<title>Housing New York Affordability Map</title>
+
+		<meta charset="UTF-8">
+		<meta name="description" content="This interactive map shows how affordable each Housing New York property is to a median-income local resident. Data comes from NYC Open Data.">
+		<meta name="keywords" content="Interactive,Map,Land,Sale,Housing,New,York,Affordable,Developer">
+		<meta name="author" content="Sam Raby">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/style.css"/>
+	    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+	   integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+	   crossorigin=""/>
+
+	    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	 	<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+	   integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+	   crossorigin=""></script>
+
+	   	<!-- Esri Geocoder Plugin--> 
+    	<script src="https://unpkg.com/esri-leaflet@2.1.3"></script>
+    	<link rel="stylesheet" href="https://unpkg.com/esri-leaflet-geocoder@2.2.9/dist/esri-leaflet-geocoder.css">
+    	<script src="https://unpkg.com/esri-leaflet-geocoder@2.2.8"></script>
+    	
+	</head>
+	<body>
+		<div id="mainmap">
+			<div id="legend">
+				<b>Buildings with <br> Affordable Units</b><br> 
+				<div class="legend-size-circles">
+	            	<span class="cir xs"></span><span class="cir s"></span><span class="cir m"></span><span class="cir l"></span>
+	       		</div>
+		       	<span style="padding-left:0px;"> fewer &emsp; &emsp; &emsp; &emsp; more </span>
+				<hr> 
+					<div style="margin-bottom: 5px;line-height:1.25">How many units<br>can <em>locals</em> afford?</div>
+		        <div>
+		            <span class="i" style="background:#d73027"></span>
+		            <label class="legend-label"> none </label>
+		        </div>
+		        <div>
+		        	<span class="i" style="background:#fc8d59"></span>
+		            <label class="legend-label">less than half</label>
+		        </div>
+		        <div>
+		        	<span class="i" style="background:#fee08b"></span>
+		            <label class="legend-label">more than half</label>
+		        </div>
+		        <div>
+		        	<span class="i" style="background:#66bd63"></span>
+		            <label class="legend-label"> all </label>
+		        </div>
+		    </div>
+    	</div>
+			<!-- SCRIPT --> 
+			<script type="text/javascript" src="js/HNYdata.js"></script>
+			<script type="text/javascript" src="js/commDistricts.js"></script>		
+			<script type="text/javascript" src="js/map.js"></script>
+	</body>
+</html>
