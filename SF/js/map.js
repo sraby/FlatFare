@@ -3,7 +3,7 @@
 var map = L.map('mainmap', {
     scrollWheelZoom: false,
     maxZoom: 18
-}).setView([40.716303, -73.940535], 11);
+}).setView([37.700283, -121.920192], 9);
 
 var tonerUrl = "https://stamen-tiles.a.ssl.fastly.net/toner-lite/{Z}/{X}/{Y}.png";
 
