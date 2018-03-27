@@ -5,25 +5,19 @@ var map = L.map('mainmap', {
     maxZoom: 18
 }).setView([38.907192, -77.036871], 11);
 
-var tonerUrl = "https://stamen-tiles.a.ssl.fastly.net/toner-lite/{Z}/{X}/{Y}.png";
-
-var url = tonerUrl.replace(/({[A-Z]})/g, function(s) {
-    return s.toLowerCase();
-});
-
-var basemap = L.tileLayer(url, {
-    subdomains: ['','a.','b.','c.','d.'],
+var basemap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    subdomains: 'abcd',
     minZoom: 0,
     maxZoom: 20,
-    opacity: 0.5,
-    type: 'png'
+    ext: 'png'
 }); 
 
 basemap.addTo(map);
 
 // SYMBOLOGY FUNCTIONS 
 
-function getColor(d) {
+/* function getColor(d) {
         return  d == 'red' ? '#E51937':
                 d == 'yellow' ? '#FFD204': 
                 d == 'green' ? '#00A950':
@@ -31,6 +25,7 @@ function getColor(d) {
                 d == 'silver' ? '#A1A3A1':
                 '#F7941E'; //orange
     }
+*/ 
 
 function getRadius(d) {
       if (d == -1) {
@@ -43,7 +38,7 @@ function getRadius(d) {
 
 function setFill(d) {
     if (d == -1) {
-        return '#000';
+        return '#465451';
       } 
     else {
       return '#FFF';
@@ -72,7 +67,7 @@ function resetHighlight(e) {
 
     if (layer.feature.properties.RailFare__PeakTime == -1) {
       layer.setStyle({
-          fillColor: '#000'
+          fillColor: '#465451'
       });
     }
     else {
@@ -94,9 +89,9 @@ function pointToLayer(feature, latlng) {
     return L.circleMarker(latlng, 
         {
             radius: getRadius(feature.properties.RailFare__PeakTime),
-            color: "#000",
+            color: "#465451",
             fillColor: setFill(feature.properties.RailFare__PeakTime),
-            strokeWidth: 2.1,
+            weight: 3,
             opacity: 1,
             fillOpacity: 1
         }
@@ -105,9 +100,10 @@ function pointToLayer(feature, latlng) {
 
 function style(feature) {
     return {
-    color: getColor(feature.properties.Name),
+    color: "#FC6150",
     weight: 7,
     opacity: 1,
+    strokeOpacity: 1
     };
 }
 
@@ -201,12 +197,13 @@ searchControl.on("results", function(data) {
 
 // LAYER CONTROL 
 
+var transit = L.layerGroup([stations, lines]);
+
 var baselayers = {
 };
 
 var overlays = {
-  "Metro Stations": stations,
-  "Metro Lines": lines
+  "DC Metro": transit
 };
 
 L.control.layers(baselayers, overlays, {position: 'topright', collapsed: true}).addTo(map);
