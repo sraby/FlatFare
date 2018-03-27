@@ -2,7 +2,7 @@
 
 var map = L.map('mainmap', {
     scrollWheelZoom: false,
-    maxZoom: 18
+    maxZoom: 14
 }).setView([37.818636, -122.263071], 10);
 
 var basemap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}.{ext}', {
@@ -15,19 +15,40 @@ var basemap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-bac
 
 basemap.addTo(map);
 
+var roads = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-lines/{z}/{x}/{y}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    subdomains: 'abcd',
+    minZoom: 12,
+    maxZoom: 20,
+    ext: 'png'
+}); 
+
+roads.addTo(map);
+
+var reference = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-labels/{z}/{x}/{y}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    subdomains: 'abcd',
+    minZoom: 12,
+    maxZoom: 20,
+    ext: 'png'
+}); 
+
+reference.addTo(map);
 
 // SYMBOLOGY FUNCTIONS 
 
-/* function getColor(d) {
-        return  d == 'PITT-SFIA (ROUTE 1 2)' ? '#FFF450':
-                d == 'FRMT-RICH (ROUTE 3 4)' ? '#F8A01B': 
-                d == 'FRMT-DALY (ROUTE 5 6)' ? '#4EB947':
-                d == 'RICH-MLBR (ROUTE 7 8)' ? '#DF1255':
-                d == 'DUBL-DALY (ROUTE 11 12)' ? '#01ADEF':
-                '#AEAFB1'; //OAK Airport Grey
+function getColor(d) {
+        return  d == null? '#B3B4B6':
+                d > 140000? '#b35806':
+                d > 120000? '#e08214': 
+                d > 100000? '#fdb863':
+                d > 80000? '#fee0b6':
+                d > 60000? '#d8daeb':
+                d > 40000? '#b2abd2':
+                d > 20000? '#8073ac':
+                '#542788'; 
     }
-
-*/ 
+ 
 
 function getRadius(d) {
       if (d == -1) {
@@ -104,13 +125,45 @@ function pointToLayer(feature, latlng) {
     );
 }
 
-function style(feature) {
+
+function pointToLayerGray(feature, latlng) {
+    return L.circleMarker(latlng, 
+        {
+            radius: 5,
+            color: "#111",
+            fillColor: "#111",
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 1
+        }
+    );
+}
+
+function styleLines(feature) {
     return {
-    // color: getColor(feature.properties.Name),
     color: "#FC6150",
     weight: 7,
     opacity: 1,
     strokeOpacity: 1,
+    };
+}
+
+function styleGray(feature) {
+    return {
+    color: "#111",
+    weight: 4,
+    opacity: 1,
+    strokeOpacity: 1,
+    };
+}
+
+function styleShapes(feature) {
+    return {
+    fillColor: getColor(feature.properties.MHI_2016),
+    weight: 1,
+    opacity: 0.7,
+    color: "#FFF",
+    fillOpacity: 0.7
     };
 }
 
@@ -121,22 +174,27 @@ function style(feature) {
 // nameFull nameSimple fareEmbarcadero
 
 lines = L.geoJson(linesBART, {
-  style: style
-}).addTo(map);
+  style: styleLines
+});
 
 stations = L.geoJson(stationsBART, {
   pointToLayer: pointToLayer,
   onEachFeature: onEachFeature
-}).addTo(map);
+});
 
+income = L.geoJson(sfMHI, {
+  style: styleShapes
+});
 
+linesGray = L.geoJson(linesBART, {
+    style: styleGray
+});
+
+stationsGray = L.geoJson(stationsBART, {
+  pointToLayer: pointToLayerGray,
+});
 
 // POP UPS 
-
-function toTitleCase(str)
-{
-    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-}
 
 function numberWithCommas(x) {
     x = x.toString();
@@ -144,13 +202,6 @@ function numberWithCommas(x) {
     while (pattern.test(x))
         x = x.replace(pattern, "$1,$2");
     return x;
-}
-
-function unitUnits(x) {
-    if (x == 1) 
-        {return 'unit'}
-    else 
-        {return 'units'}
 }
 
 stations.bindTooltip(function (layer) {
@@ -166,10 +217,14 @@ stations.bindPopup(function (layer) {
         return L.Util.template('<h2>' + layer.feature.properties.nameSimple + '</h2>' +
             'From here, it costs <b>$' + (layer.feature.properties.fareEmbarcadero).toFixed(2) + '</b> to ride to Embarcadero.' + 
               '<hr style="height:0px; visibility:hidden;" />' +
-            'Monthly expense: <b>$' + (40*layer.feature.properties.fareEmbarcadero).toFixed(0) 
-            );
+            'Monthly expense: <b>$' + (40*layer.feature.properties.fareEmbarcadero).toFixed(0) + '</b>');
     }
 });
+
+income.bindTooltip(function (layer) {
+    return L.Util.template('Census Tract ' + layer.feature.properties.NAME + ', ' + layer.feature.properties.COUNTY + '<br>' +
+        '<em>Median Household Income: <b>$' + numberWithCommas(layer.feature.properties.MHI_2016) + '</b></em>');  
+    });
 
 map.on('popupopen', function(e) {
     var location = map.project(e.popup._latlng); 
@@ -203,13 +258,30 @@ searchControl.on("results", function(data) {
 // LAYER CONTROL 
 
 var transit = L.layerGroup([stations, lines]);
+transit.addTo(map);
+
+var people = L.layerGroup([income, stationsGray, linesGray]);
 
 var baselayers = {
+    "BART transit": transit,
+    "Median Income": people
 };
 
 var overlays = {
-  "Metro Stations": stations,
-  "Metro Lines": lines
 };
 
-L.control.layers(baselayers, overlays, {position: 'topright', collapsed: true}).addTo(map);
+L.control.layers(baselayers, overlays, {position: 'topright', collapsed: false}).addTo(map);
+
+map.on('baselayerchange', function(eventLayer) {
+  if (eventLayer.name === 'Median Income') { 
+     $("#legend-top").css("display","none");
+     $("#legend-bottom").css("display","block"); // You should write a function to remove the previously shown control, or more simply all other legend controls (Leaflet will not trigger an erro if you try to remove something that is not there anyway)
+  } 
+  else {
+     $("#legend-bottom").css("display","none");
+     $("#legend-top").css("display","block");
+  }
+});
+
+
+
