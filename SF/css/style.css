@@ -16,6 +16,10 @@ b {
 #active {
 }
 
+.leaflet-control-layers-list {
+    font-size: 14px;
+}
+
 table {
     text-align: left;
     font-size: 12px;

@@ -2,7 +2,8 @@
 
 var map = L.map('mainmap', {
     scrollWheelZoom: false,
-    maxZoom: 18
+    minZoom: 8,
+    maxZoom: 14
 }).setView([38.907192, -77.036871], 11);
 
 var basemap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}.{ext}', {
@@ -15,17 +16,39 @@ var basemap = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-bac
 
 basemap.addTo(map);
 
+var roads = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-lines/{z}/{x}/{y}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    subdomains: 'abcd',
+    minZoom: 0,
+    maxZoom: 20,
+    ext: 'png'
+}); 
+
+roads.addTo(map);
+
+var reference = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-labels/{z}/{x}/{y}.{ext}', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    subdomains: 'abcd',
+    minZoom: 12,
+    maxZoom: 20,
+    ext: 'png'
+}); 
+
+reference.addTo(map);
+
 // SYMBOLOGY FUNCTIONS 
 
-/* function getColor(d) {
-        return  d == 'red' ? '#E51937':
-                d == 'yellow' ? '#FFD204': 
-                d == 'green' ? '#00A950':
-                d == 'blue' ? '#0077C0':
-                d == 'silver' ? '#A1A3A1':
-                '#F7941E'; //orange
+function getColor(d) {
+        return  d == null? '#B3B4B6':
+                d > 140000? '#b35806':
+                d > 120000? '#e08214': 
+                d > 100000? '#fdb863':
+                d > 80000? '#fee0b6':
+                d > 60000? '#d8daeb':
+                d > 40000? '#b2abd2':
+                d > 20000? '#8073ac':
+                '#542788'; 
     }
-*/ 
 
 function getRadius(d) {
       if (d == -1) {
@@ -98,12 +121,44 @@ function pointToLayer(feature, latlng) {
     );
 }
 
-function style(feature) {
+function pointToLayerGray(feature, latlng) {
+    return L.circleMarker(latlng, 
+        {
+            radius: 5,
+            color: "#111",
+            fillColor: "#111",
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 1
+        }
+    );
+}
+
+function styleLines(feature) {
     return {
     color: "#FC6150",
     weight: 7,
     opacity: 1,
-    strokeOpacity: 1
+    strokeOpacity: 1,
+    };
+}
+
+function styleGray(feature) {
+    return {
+    color: "#111",
+    weight: 4,
+    opacity: 1,
+    strokeOpacity: 1,
+    };
+}
+
+function styleShapes(feature) {
+    return {
+    fillColor: getColor(feature.properties.MHI_2016),
+    weight: 1,
+    opacity: 0.7,
+    color: "#FFF",
+    fillOpacity: 0.7
     };
 }
 
@@ -114,22 +169,28 @@ function style(feature) {
 // Name GIS_ID  WEB_URL ADDRESS LINE  Code  NameFull  RailFare__PeakTime  RailFare__OffPeakTime RailFare__SeniorDisabled  lon lat
 
 lines = L.geoJson(linesWMATA, {
-  style: style
-}).addTo(map);
+  style: styleLines
+});
 
 stations = L.geoJson(stationsWMATA, {
   pointToLayer: pointToLayer,
   onEachFeature: onEachFeature
-}).addTo(map);
+});
 
+income = L.geoJson(dcMHI, {
+  style: styleShapes
+});
+
+linesGray = L.geoJson(linesWMATA, {
+    style: styleGray
+});
+
+stationsGray = L.geoJson(stationsWMATA, {
+  pointToLayer: pointToLayerGray,
+});
 
 
 // POP UPS 
-
-function toTitleCase(str)
-{
-    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-}
 
 function numberWithCommas(x) {
     x = x.toString();
@@ -139,12 +200,6 @@ function numberWithCommas(x) {
     return x;
 }
 
-function unitUnits(x) {
-    if (x == 1) 
-        {return 'unit'}
-    else 
-        {return 'units'}
-}
 
 stations.bindTooltip(function (layer) {
     return L.Util.template('<b>' + layer.feature.properties.NameFull + '</b>');  
@@ -165,6 +220,11 @@ stations.bindPopup(function (layer) {
             );
     }
 });
+
+income.bindTooltip(function (layer) {
+    return L.Util.template('Census Tract ' + layer.feature.properties.NAME + ', ' + layer.feature.properties.COUNTY + '<br>' +
+        '<em>Median Household Income: <b>$' + numberWithCommas(layer.feature.properties.MHI_2016) + '</b></em>');  
+    });
 
 map.on('popupopen', function(e) {
     var location = map.project(e.popup._latlng); 
@@ -198,12 +258,28 @@ searchControl.on("results", function(data) {
 // LAYER CONTROL 
 
 var transit = L.layerGroup([stations, lines]);
+transit.addTo(map);
+
+var people = L.layerGroup([income, stationsGray, linesGray]);
 
 var baselayers = {
+    "DC Metro": transit,
+    "Median Income": people
 };
 
 var overlays = {
-  "DC Metro": transit
 };
 
-L.control.layers(baselayers, overlays, {position: 'topright', collapsed: true}).addTo(map);
+L.control.layers(baselayers, overlays, {position: 'topright', collapsed: false}).addTo(map);
+
+map.on('baselayerchange', function(eventLayer) {
+  if (eventLayer.name === 'Median Income') { 
+     $("#legend-top").css("display","none");
+     $("#legend-bottom").css("display","block"); // You should write a function to remove the previously shown control, or more simply all other legend controls (Leaflet will not trigger an erro if you try to remove something that is not there anyway)
+  } 
+  else {
+     $("#legend-bottom").css("display","none");
+     $("#legend-top").css("display","block");
+  }
+});
+

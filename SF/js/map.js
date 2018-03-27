@@ -2,6 +2,7 @@
 
 var map = L.map('mainmap', {
     scrollWheelZoom: false,
+    minZoom: 8,
     maxZoom: 14
 }).setView([37.818636, -122.263071], 10);
 
@@ -18,7 +19,7 @@ basemap.addTo(map);
 var roads = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-lines/{z}/{x}/{y}.{ext}', {
     attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     subdomains: 'abcd',
-    minZoom: 12,
+    minZoom: 0,
     maxZoom: 20,
     ext: 'png'
 }); 
@@ -215,9 +216,8 @@ stations.bindPopup(function (layer) {
     }
     else {
         return L.Util.template('<h2>' + layer.feature.properties.nameSimple + '</h2>' +
-            'From here, it costs <b>$' + (layer.feature.properties.fareEmbarcadero).toFixed(2) + '</b> to ride to Embarcadero.' + 
-              '<hr style="height:0px; visibility:hidden;" />' +
-            'Monthly expense: <b>$' + (40*layer.feature.properties.fareEmbarcadero).toFixed(0) + '</b>');
+            'From here, it costs <b>$' + (layer.feature.properties.fareEmbarcadero).toFixed(2) + '</b> to ride to Embarcadero.<br>' + 
+            'That&#8217s a monthly commuter expense of <b>$' + (40*layer.feature.properties.fareEmbarcadero).toFixed(0) + '.</b>');
     }
 });
 
@@ -243,7 +243,7 @@ map.on('popupclose', function(e) {
 
 var searchControl = L.esri.Geocoding.geosearch({
   position:'topleft',
-  searchBounds: L.latLngBounds([38.653271, -77.387060],[39.117203, -76.678442])
+  searchBounds: L.latLngBounds([38.064640, -122.713573],[37.338832, -121.615484])
 }).addTo(map);
 
 var results = L.layerGroup().addTo(map);
@@ -263,7 +263,7 @@ transit.addTo(map);
 var people = L.layerGroup([income, stationsGray, linesGray]);
 
 var baselayers = {
-    "BART transit": transit,
+    "BART system": transit,
     "Median Income": people
 };
 
