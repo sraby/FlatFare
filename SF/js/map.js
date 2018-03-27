@@ -103,13 +103,33 @@ function resetHighlight(e) {
           fillColor: '#FFF'
       });
     }
-
 }
 
 function onEachFeature(feature, layer) {
     layer.on({
         mouseover: highlightFeature,
         mouseout: resetHighlight
+    });
+} 
+
+function highlightShape(e) {
+
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 4,
+        opacity: 0.9
+    });
+}
+
+function resetShape(e) {
+    income.resetStyle(e.target);
+}
+
+function onEachShape(feature, layer) {
+    layer.on({
+        mouseover: highlightShape,
+        mouseout: resetShape
     });
 } 
 
@@ -125,7 +145,6 @@ function pointToLayer(feature, latlng) {
         }
     );
 }
-
 
 function pointToLayerGray(feature, latlng) {
     return L.circleMarker(latlng, 
@@ -184,7 +203,8 @@ stations = L.geoJson(stationsBART, {
 });
 
 income = L.geoJson(sfMHI, {
-  style: styleShapes
+  style: styleShapes,
+  onEachFeature: onEachShape
 });
 
 linesGray = L.geoJson(linesBART, {
