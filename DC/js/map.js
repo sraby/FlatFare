@@ -236,9 +236,9 @@ stations.bindPopup(function (layer) {
         return L.Util.template('<h2>' + layer.feature.properties.NameFull + '</h2>' +
             'From here, it costs <b>$' + (layer.feature.properties.RailFare__PeakTime).toFixed(2) + '</b> to ride to Union Station during peak hours.' + 
               '<hr style="height:0px; visibility:hidden;" />' +
-            'Monthly expense: <br>' + 
-            '• Peak: <b>$' + (40*layer.feature.properties.RailFare__PeakTime).toFixed(0) + '</b><br>' +
-            '• Off-peak: <b>$' + (40*layer.feature.properties.RailFare__OffPeakTime).toFixed(0) + '</b>' 
+            'Monthly expense (with SelectPass):<br>' + 
+            '• Peak: <b>$' + (36*layer.feature.properties.RailFare__PeakTime).toFixed(0) + '</b><br>' +
+            '• Off-peak: <b>$' + (36*layer.feature.properties.RailFare__OffPeakTime).toFixed(0) + '</b>' 
             );
     }
 });
